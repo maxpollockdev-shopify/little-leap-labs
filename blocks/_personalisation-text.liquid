@@ -1,0 +1,151 @@
+
+{%- liquid
+  assign block_settings = block.settings
+  assign property_key = block_settings.property_key | default: block_settings.heading | default: block.id
+  assign property_name = 'properties[custom-property]' | replace: 'custom-property', property_key
+  assign product_form_id = 'BuyButtons-ProductForm-section.id' | replace: 'section.id', section.id
+  assign element_id = 'PersonalisationText-' | append: block.id
+-%}
+
+<div
+  class="personalisation-field personalisation-field--text spacing-style"
+  style="{% render 'spacing-style', settings: block_settings %}"
+  data-error-message="{{ 'content.personalisation.error_text' | t | escape }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block_settings.badge != blank %}
+    <span class="personalisation-field__badge">{{ block_settings.badge | escape }}</span>
+  {% endif %}
+
+  {% if block_settings.heading != blank %}
+    <label class="personalisation-field__heading" for="{{ element_id }}">
+      {{ block_settings.heading | escape }}
+      {% if block_settings.required %}
+        <span aria-hidden="true">*</span>
+      {% endif %}
+    </label>
+  {% endif %}
+
+  {% if block_settings.description != blank %}
+    <p class="personalisation-field__description">
+      {{ block_settings.description | escape }}
+    </p>
+  {% endif %}
+
+  <input
+    type="text"
+    id="{{ element_id }}"
+    name="{{ property_name }}"
+    class="personalisation-field__input"
+    form="{{ product_form_id }}"
+    placeholder="{{ block_settings.placeholder | escape }}"
+    maxlength="{{ block_settings.max_length }}"
+    {% if block_settings.required %}
+      required
+      aria-required="true"
+    {% endif %}
+  >
+</div>
+
+{% schema %}
+{
+  "name": "t:names.personalisation_text",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:settings.personalisation.content"
+    },
+    {
+      "type": "text",
+      "id": "badge",
+      "label": "t:settings.personalisation.badge",
+      "default": "t:settings.personalisation_text.default_badge",
+      "info": "t:settings.personalisation.badge_info"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:settings.personalisation_text.heading",
+      "default": "t:settings.personalisation_text.default_heading"
+    },
+    {
+      "type": "text",
+      "id": "description",
+      "label": "t:settings.personalisation_text.description"
+    },
+    {
+      "type": "text",
+      "id": "property_key",
+      "label": "t:settings.personalisation.property_key",
+      "default": "t:settings.personalisation_text.default_property_key",
+      "info": "t:settings.personalisation.property_key_info"
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "t:settings.personalisation_text.placeholder",
+      "default": "t:settings.personalisation_text.default_placeholder"
+    },
+    {
+      "type": "range",
+      "id": "max_length",
+      "label": "t:settings.personalisation_text.max_length",
+      "min": 25,
+      "max": 250,
+      "step": 5,
+      "default": 100
+    },
+    {
+      "type": "checkbox",
+      "id": "required",
+      "label": "t:settings.personalisation.required",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "t:settings.left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "t:settings.right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ]
+}
+{% endschema %}

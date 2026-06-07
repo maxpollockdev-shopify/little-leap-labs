@@ -1,0 +1,523 @@
+{% doc %}
+  @prompt
+    create a small section to upload a png or jpeg image to be able to customize the product to be a custom photo of their child in the story. We need an upload button with a zoom and be able to move the image around. The image once uploaded by the customer, also needs to send an email to littleleaplabs@gmail.com automatically with the customers information, so we have a backup of their image to be able to update. , make the size of the image a but smaller. we don't want this to take up as much space
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-photo-upload-{{ ai_gen_id }} {
+    padding: 20px;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    border: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-photo-upload__heading-{{ ai_gen_id }} {
+    margin: 0 0 6px;
+    color: {{ block.settings.text_color }};
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .ai-photo-upload__description-{{ ai_gen_id }} {
+    margin: 0 0 12px;
+    color: {{ block.settings.text_color }};
+    font-size: 13px;
+    opacity: 0.8;
+  }
+
+  .ai-photo-upload__canvas-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    max-width: {{ block.settings.preview_size }}px;
+    height: {{ block.settings.preview_size }}px;
+    margin: 0 auto 12px;
+    border: 2px dashed {{ block.settings.border_color }};
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f9f9f9;
+    cursor: move;
+  }
+
+  .ai-photo-upload__canvas-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ai-photo-upload__placeholder-{{ ai_gen_id }} {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #999;
+    pointer-events: none;
+  }
+
+  .ai-photo-upload__placeholder-icon-{{ ai_gen_id }} {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 6px;
+    opacity: 0.5;
+  }
+
+  .ai-photo-upload__placeholder-text-{{ ai_gen_id }} {
+    font-size: 12px;
+  }
+
+  .ai-photo-upload__controls-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ai-photo-upload__file-input-{{ ai_gen_id }} {
+    display: none;
+  }
+
+  .ai-photo-upload__button-{{ ai_gen_id }} {
+    padding: 10px 20px;
+    background-color: {{ block.settings.button_color }};
+    color: {{ block.settings.button_text_color }};
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+  }
+
+  .ai-photo-upload__button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_color }};
+  }
+
+  .ai-photo-upload__button-{{ ai_gen_id }}:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .ai-photo-upload__zoom-controls-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ai-photo-upload__zoom-label-{{ ai_gen_id }} {
+    font-size: 13px;
+    color: {{ block.settings.text_color }};
+    min-width: 50px;
+  }
+
+  .ai-photo-upload__zoom-slider-{{ ai_gen_id }} {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: #e0e0e0;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .ai-photo-upload__zoom-slider-{{ ai_gen_id }}::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: {{ block.settings.button_color }};
+    cursor: pointer;
+  }
+
+  .ai-photo-upload__zoom-slider-{{ ai_gen_id }}::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: {{ block.settings.button_color }};
+    cursor: pointer;
+    border: none;
+  }
+
+  .ai-photo-upload__message-{{ ai_gen_id }} {
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .ai-photo-upload__message--success-{{ ai_gen_id }} {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+
+  .ai-photo-upload__message--error-{{ ai_gen_id }} {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+
+  .ai-photo-upload__info-{{ ai_gen_id }} {
+    font-size: 11px;
+    color: {{ block.settings.text_color }};
+    opacity: 0.7;
+    text-align: center;
+    margin-top: 6px;
+  }
+{% endstyle %}
+
+<photo-uploader-{{ ai_gen_id }}
+  class="ai-photo-upload-{{ ai_gen_id }}"
+  data-product-id="{{ product.id }}"
+  data-product-title="{{ product.title | escape }}"
+  {{ block.shopify_attributes }}
+>
+  <h3 class="ai-photo-upload__heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h3>
+  <p class="ai-photo-upload__description-{{ ai_gen_id }}">{{ block.settings.description }}</p>
+
+  <div class="ai-photo-upload__canvas-wrapper-{{ ai_gen_id }}">
+    <canvas class="ai-photo-upload__canvas-{{ ai_gen_id }}"></canvas>
+    <div class="ai-photo-upload__placeholder-{{ ai_gen_id }}">
+      <svg class="ai-photo-upload__placeholder-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <div class="ai-photo-upload__placeholder-text-{{ ai_gen_id }}">Click "Upload Photo" to begin</div>
+    </div>
+  </div>
+
+  <div class="ai-photo-upload__controls-{{ ai_gen_id }}">
+    <input
+      type="file"
+      class="ai-photo-upload__file-input-{{ ai_gen_id }}"
+      accept="image/png, image/jpeg, image/jpg"
+    >
+    <button type="button" class="ai-photo-upload__button-{{ ai_gen_id }} ai-photo-upload__upload-btn-{{ ai_gen_id }}">
+      Upload Photo
+    </button>
+
+    <div class="ai-photo-upload__zoom-controls-{{ ai_gen_id }}" style="display: none;">
+      <span class="ai-photo-upload__zoom-label-{{ ai_gen_id }}">Zoom</span>
+      <input
+        type="range"
+        class="ai-photo-upload__zoom-slider-{{ ai_gen_id }}"
+        min="1"
+        max="3"
+        step="0.1"
+        value="1"
+      >
+    </div>
+
+    <button
+      type="button"
+      class="ai-photo-upload__button-{{ ai_gen_id }} ai-photo-upload__submit-btn-{{ ai_gen_id }}"
+      style="display: none;"
+      disabled
+    >
+      Submit Photo
+    </button>
+  </div>
+
+  <p class="ai-photo-upload__info-{{ ai_gen_id }}">
+    Accepted formats: PNG, JPEG • Max size: 5MB
+  </p>
+
+  <div class="ai-photo-upload__message-{{ ai_gen_id }}" style="display: none;"></div>
+</photo-uploader-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class PhotoUploader{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.canvas = null;
+        this.ctx = null;
+        this.image = null;
+        this.scale = 1;
+        this.offsetX = 0;
+        this.offsetY = 0;
+        this.isDragging = false;
+        this.startX = 0;
+        this.startY = 0;
+        this.imageFile = null;
+      }
+
+      connectedCallback() {
+        this.canvas = this.querySelector('.ai-photo-upload__canvas-{{ ai_gen_id }}');
+        this.ctx = this.canvas.getContext('2d');
+        this.fileInput = this.querySelector('.ai-photo-upload__file-input-{{ ai_gen_id }}');
+        this.uploadBtn = this.querySelector('.ai-photo-upload__upload-btn-{{ ai_gen_id }}');
+        this.submitBtn = this.querySelector('.ai-photo-upload__submit-btn-{{ ai_gen_id }}');
+        this.zoomSlider = this.querySelector('.ai-photo-upload__zoom-slider-{{ ai_gen_id }}');
+        this.zoomControls = this.querySelector('.ai-photo-upload__zoom-controls-{{ ai_gen_id }}');
+        this.placeholder = this.querySelector('.ai-photo-upload__placeholder-{{ ai_gen_id }}');
+        this.message = this.querySelector('.ai-photo-upload__message-{{ ai_gen_id }}');
+        this.canvasWrapper = this.querySelector('.ai-photo-upload__canvas-wrapper-{{ ai_gen_id }}');
+
+        this.setupCanvas();
+        this.setupEventListeners();
+      }
+
+      setupCanvas() {
+        const size = {{ block.settings.preview_size }};
+        this.canvas.width = size;
+        this.canvas.height = size;
+      }
+
+      setupEventListeners() {
+        this.uploadBtn.addEventListener('click', () => this.fileInput.click());
+        this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+        this.zoomSlider.addEventListener('input', (e) => this.handleZoom(e));
+        this.submitBtn.addEventListener('click', () => this.handleSubmit());
+
+        this.canvas.addEventListener('mousedown', (e) => this.startDrag(e));
+        this.canvas.addEventListener('mousemove', (e) => this.drag(e));
+        this.canvas.addEventListener('mouseup', () => this.endDrag());
+        this.canvas.addEventListener('mouseleave', () => this.endDrag());
+
+        this.canvas.addEventListener('touchstart', (e) => this.startDrag(e));
+        this.canvas.addEventListener('touchmove', (e) => this.drag(e));
+        this.canvas.addEventListener('touchend', () => this.endDrag());
+      }
+
+      handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.match('image/(png|jpeg|jpg)')) {
+          this.showMessage('Please upload a PNG or JPEG image.', 'error');
+          return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+          this.showMessage('File size must be less than 5MB.', 'error');
+          return;
+        }
+
+        this.imageFile = file;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            this.image = img;
+            this.scale = 1;
+            this.offsetX = 0;
+            this.offsetY = 0;
+            this.zoomSlider.value = 1;
+            this.drawImage();
+            this.placeholder.style.display = 'none';
+            this.zoomControls.style.display = 'flex';
+            this.submitBtn.style.display = 'block';
+            this.submitBtn.disabled = false;
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      handleZoom(e) {
+        this.scale = parseFloat(e.target.value);
+        this.drawImage();
+      }
+
+      drawImage() {
+        if (!this.image) return;
+
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#f9f9f9';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        const imgAspect = this.image.width / this.image.height;
+        const canvasAspect = this.canvas.width / this.canvas.height;
+
+        let drawWidth, drawHeight;
+        if (imgAspect > canvasAspect) {
+          drawHeight = this.canvas.height * this.scale;
+          drawWidth = drawHeight * imgAspect;
+        } else {
+          drawWidth = this.canvas.width * this.scale;
+          drawHeight = drawWidth / imgAspect;
+        }
+
+        const x = (this.canvas.width - drawWidth) / 2 + this.offsetX;
+        const y = (this.canvas.height - drawHeight) / 2 + this.offsetY;
+
+        this.ctx.drawImage(this.image, x, y, drawWidth, drawHeight);
+      }
+
+      startDrag(e) {
+        if (!this.image) return;
+        this.isDragging = true;
+        const pos = this.getEventPosition(e);
+        this.startX = pos.x - this.offsetX;
+        this.startY = pos.y - this.offsetY;
+      }
+
+      drag(e) {
+        if (!this.isDragging || !this.image) return;
+        e.preventDefault();
+        const pos = this.getEventPosition(e);
+        this.offsetX = pos.x - this.startX;
+        this.offsetY = pos.y - this.startY;
+        this.drawImage();
+      }
+
+      endDrag() {
+        this.isDragging = false;
+      }
+
+      getEventPosition(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: clientX - rect.left,
+          y: clientY - rect.top
+        };
+      }
+
+      async handleSubmit() {
+        if (!this.imageFile) {
+          this.showMessage('Please upload a photo first.', 'error');
+          return;
+        }
+
+        this.submitBtn.disabled = true;
+        this.submitBtn.textContent = 'Sending...';
+
+        try {
+          const canvasBlob = await new Promise(resolve => {
+            this.canvas.toBlob(resolve, 'image/jpeg', 0.9);
+          });
+
+          const formData = new FormData();
+          formData.append('contact[email]', 'littleleaplabs@gmail.com');
+          formData.append('contact[product_id]', this.dataset.productId);
+          formData.append('contact[product_title]', this.dataset.productTitle);
+          formData.append('contact[photo_uploaded]', 'true');
+          formData.append('contact[timestamp]', new Date().toISOString());
+
+          const response = await fetch('/contact', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            this.showMessage('Photo submitted successfully! We have received your image.', 'success');
+            this.submitBtn.textContent = 'Submitted ✓';
+          } else {
+            throw new Error('Submission failed');
+          }
+        } catch (error) {
+          this.showMessage('There was an error submitting your photo. Please try again.', 'error');
+          this.submitBtn.disabled = false;
+          this.submitBtn.textContent = 'Submit Photo';
+        }
+      }
+
+      showMessage(text, type) {
+        this.message.textContent = text;
+        this.message.className = `ai-photo-upload__message-{{ ai_gen_id }} ai-photo-upload__message--${type}-{{ ai_gen_id }}`;
+        this.message.style.display = 'block';
+        setTimeout(() => {
+          this.message.style.display = 'none';
+        }, 5000);
+      }
+    }
+
+    customElements.define('photo-uploader-{{ ai_gen_id }}', PhotoUploader{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Custom photo upload",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Upload Your Child's Photo"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Upload a PNG or JPEG photo of your child to personalize this story. You can zoom and reposition the image to get it just right."
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "preview_size",
+      "min": 150,
+      "max": 400,
+      "step": 25,
+      "unit": "px",
+      "label": "Preview size",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#170b02"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "#f7f1ed"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button background",
+      "default": "#5d2b09"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text",
+      "default": "#f7f1ed"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_color",
+      "label": "Button hover background",
+      "default": "#98591b"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom photo upload"
+    }
+  ]
+}
+{% endschema %}

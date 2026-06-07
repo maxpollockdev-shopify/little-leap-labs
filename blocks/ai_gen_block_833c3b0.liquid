@@ -1,0 +1,694 @@
+{% doc %}
+  @prompt
+    create an upload button feature for someone to their own a PNG or JPEG and be able to customize the face on the product (which is a customized book). If you're able, add a zoom and the ability to move the image around on the book to preview how their image will render on the actual book.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-book-customizer-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+  }
+
+  .ai-book-customizer__title-{{ ai_gen_id }} {
+    margin: 0;
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.title_size }}px;
+  }
+
+  .ai-book-customizer__description-{{ ai_gen_id }} {
+    margin: 0;
+    color: {{ block.settings.text_color }};
+    opacity: 0.8;
+  }
+
+  .ai-book-customizer__content-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-book-customizer__content-{{ ai_gen_id }} {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .ai-book-customizer__preview-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    background-color: {{ block.settings.preview_bg_color }};
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid {{ block.settings.border_color }};
+  }
+
+  .ai-book-customizer__book-cover-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-book-customizer__book-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-book-customizer__face-container-{{ ai_gen_id }} {
+    position: absolute;
+    top: {{ block.settings.face_position_y }}%;
+    left: {{ block.settings.face_position_x }}%;
+    width: {{ block.settings.face_size }}%;
+    height: {{ block.settings.face_size }}%;
+    transform: translate(-50%, -50%);
+    cursor: move;
+    border: 2px dashed transparent;
+    transition: border-color 0.2s ease;
+    overflow: hidden;
+    border-radius: {{ block.settings.face_border_radius }}%;
+  }
+
+  .ai-book-customizer__face-container-{{ ai_gen_id }}:hover,
+  .ai-book-customizer__face-container-{{ ai_gen_id }}.dragging {
+    border-color: {{ block.settings.primary_color }};
+  }
+
+  .ai-book-customizer__face-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(var(--ai-zoom-{{ ai_gen_id }}, 1));
+    transform-origin: center;
+  }
+
+  .ai-book-customizer__placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: {{ block.settings.text_color }};
+    font-size: 14px;
+    text-align: center;
+    padding: 16px;
+  }
+
+  .ai-book-customizer__controls-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .ai-book-customizer__upload-section-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .ai-book-customizer__label-{{ ai_gen_id }} {
+    font-weight: 600;
+    color: {{ block.settings.text_color }};
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .ai-book-customizer__upload-button-{{ ai_gen_id }} {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background-color: {{ block.settings.button_color }};
+    color: {{ block.settings.button_text_color }};
+    border: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+
+  .ai-book-customizer__upload-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_color }};
+  }
+
+  .ai-book-customizer__file-input-{{ ai_gen_id }} {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+  }
+
+  .ai-book-customizer__file-info-{{ ai_gen_id }} {
+    font-size: 12px;
+    color: {{ block.settings.text_color }};
+    opacity: 0.7;
+  }
+
+  .ai-book-customizer__zoom-section-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .ai-book-customizer__zoom-controls-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ai-book-customizer__zoom-button-{{ ai_gen_id }} {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: {{ block.settings.button_color }};
+    color: {{ block.settings.button_text_color }};
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.2s ease;
+  }
+
+  .ai-book-customizer__zoom-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_color }};
+  }
+
+  .ai-book-customizer__zoom-button-{{ ai_gen_id }}:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .ai-book-customizer__zoom-slider-{{ ai_gen_id }} {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: {{ block.settings.border_color }};
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .ai-book-customizer__zoom-slider-{{ ai_gen_id }}::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: {{ block.settings.primary_color }};
+    cursor: pointer;
+  }
+
+  .ai-book-customizer__zoom-slider-{{ ai_gen_id }}::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: {{ block.settings.primary_color }};
+    cursor: pointer;
+    border: none;
+  }
+
+  .ai-book-customizer__zoom-value-{{ ai_gen_id }} {
+    min-width: 45px;
+    text-align: right;
+    font-size: 14px;
+    color: {{ block.settings.text_color }};
+  }
+
+  .ai-book-customizer__instructions-{{ ai_gen_id }} {
+    padding: 12px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    font-size: 12px;
+    color: {{ block.settings.text_color }};
+    line-height: 1.5;
+  }
+
+  .ai-book-customizer__reset-button-{{ ai_gen_id }} {
+    padding: 10px 20px;
+    background-color: transparent;
+    color: {{ block.settings.text_color }};
+    border: 1px solid {{ block.settings.border_color }};
+    border-radius: {{ block.settings.button_border_radius }}px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+
+  .ai-book-customizer__reset-button-{{ ai_gen_id }}:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+{% endstyle %}
+
+<book-customizer-{{ ai_gen_id }}
+  class="ai-book-customizer-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.title != blank %}
+    <h3 class="ai-book-customizer__title-{{ ai_gen_id }}">{{ block.settings.title }}</h3>
+  {% endif %}
+
+  {% if block.settings.description != blank %}
+    <p class="ai-book-customizer__description-{{ ai_gen_id }}">{{ block.settings.description }}</p>
+  {% endif %}
+
+  <div class="ai-book-customizer__content-{{ ai_gen_id }}">
+    <div class="ai-book-customizer__preview-{{ ai_gen_id }}">
+      <div class="ai-book-customizer__book-cover-{{ ai_gen_id }}">
+        {% if block.settings.book_cover_image %}
+          <img
+            src="{{ block.settings.book_cover_image | image_url: width: 800 }}"
+            alt="{{ block.settings.book_cover_image.alt | escape }}"
+            class="ai-book-customizer__book-image-{{ ai_gen_id }}"
+            loading="lazy"
+          >
+        {% else %}
+          <div class="ai-book-customizer__placeholder-{{ ai_gen_id }}">
+            Add a book cover image in the block settings
+          </div>
+        {% endif %}
+
+        <div
+          class="ai-book-customizer__face-container-{{ ai_gen_id }}"
+          data-face-container
+        >
+          <img
+            class="ai-book-customizer__face-image-{{ ai_gen_id }}"
+            data-face-image
+            style="display: none;"
+            alt="Uploaded face"
+          >
+          <div
+            class="ai-book-customizer__placeholder-{{ ai_gen_id }}"
+            data-face-placeholder
+          >
+            Upload a photo to preview
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-book-customizer__controls-{{ ai_gen_id }}">
+      <div class="ai-book-customizer__upload-section-{{ ai_gen_id }}">
+        <label class="ai-book-customizer__label-{{ ai_gen_id }}">
+          {{ block.settings.upload_label }}
+        </label>
+        <button class="ai-book-customizer__upload-button-{{ ai_gen_id }}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          {{ block.settings.button_text }}
+          <input
+            type="file"
+            class="ai-book-customizer__file-input-{{ ai_gen_id }}"
+            accept="image/png, image/jpeg, image/jpg"
+            data-file-input
+          >
+        </button>
+        <p class="ai-book-customizer__file-info-{{ ai_gen_id }}">
+          Accepts PNG and JPEG files
+        </p>
+      </div>
+
+      <div class="ai-book-customizer__zoom-section-{{ ai_gen_id }}">
+        <label class="ai-book-customizer__label-{{ ai_gen_id }}">
+          Zoom
+        </label>
+        <div class="ai-book-customizer__zoom-controls-{{ ai_gen_id }}">
+          <button
+            class="ai-book-customizer__zoom-button-{{ ai_gen_id }}"
+            data-zoom-out
+            aria-label="Zoom out"
+          >
+            −
+          </button>
+          <input
+            type="range"
+            class="ai-book-customizer__zoom-slider-{{ ai_gen_id }}"
+            min="1"
+            max="3"
+            step="0.1"
+            value="1"
+            data-zoom-slider
+          >
+          <button
+            class="ai-book-customizer__zoom-button-{{ ai_gen_id }}"
+            data-zoom-in
+            aria-label="Zoom in"
+          >
+            +
+          </button>
+          <span class="ai-book-customizer__zoom-value-{{ ai_gen_id }}" data-zoom-value>100%</span>
+        </div>
+      </div>
+
+      <div class="ai-book-customizer__instructions-{{ ai_gen_id }}">
+        <strong>How to customize:</strong><br>
+        1. Upload a PNG or JPEG photo<br>
+        2. Use the zoom slider to adjust size<br>
+        3. Drag the photo to reposition it on the book cover
+      </div>
+
+      <button
+        class="ai-book-customizer__reset-button-{{ ai_gen_id }}"
+        data-reset-button
+      >
+        Reset to Default
+      </button>
+    </div>
+  </div>
+</book-customizer-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class BookCustomizer{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.zoom = 1;
+        this.isDragging = false;
+        this.startX = 0;
+        this.startY = 0;
+        this.currentX = {{ block.settings.face_position_x }};
+        this.currentY = {{ block.settings.face_position_y }};
+      }
+
+      connectedCallback() {
+        this.fileInput = this.querySelector('[data-file-input]');
+        this.faceImage = this.querySelector('[data-face-image]');
+        this.facePlaceholder = this.querySelector('[data-face-placeholder]');
+        this.faceContainer = this.querySelector('[data-face-container]');
+        this.zoomSlider = this.querySelector('[data-zoom-slider]');
+        this.zoomValue = this.querySelector('[data-zoom-value]');
+        this.zoomInBtn = this.querySelector('[data-zoom-in]');
+        this.zoomOutBtn = this.querySelector('[data-zoom-out]');
+        this.resetBtn = this.querySelector('[data-reset-button]');
+
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        this.fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
+        this.zoomSlider.addEventListener('input', (e) => this.handleZoom(e.target.value));
+        this.zoomInBtn.addEventListener('click', () => this.adjustZoom(0.1));
+        this.zoomOutBtn.addEventListener('click', () => this.adjustZoom(-0.1));
+        this.resetBtn.addEventListener('click', () => this.reset());
+
+        this.faceContainer.addEventListener('mousedown', (e) => this.startDrag(e));
+        this.faceContainer.addEventListener('touchstart', (e) => this.startDrag(e));
+        document.addEventListener('mousemove', (e) => this.drag(e));
+        document.addEventListener('touchmove', (e) => this.drag(e));
+        document.addEventListener('mouseup', () => this.stopDrag());
+        document.addEventListener('touchend', () => this.stopDrag());
+      }
+
+      handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+        if (!validTypes.includes(file.type)) {
+          alert('Please upload a PNG or JPEG file');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.faceImage.src = e.target.result;
+          this.faceImage.style.display = 'block';
+          this.facePlaceholder.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+
+      handleZoom(value) {
+        this.zoom = parseFloat(value);
+        this.faceImage.style.setProperty('--ai-zoom-{{ ai_gen_id }}', this.zoom);
+        this.zoomValue.textContent = Math.round(this.zoom * 100) + '%';
+        this.updateZoomButtons();
+      }
+
+      adjustZoom(delta) {
+        const newZoom = Math.max(1, Math.min(3, this.zoom + delta));
+        this.zoomSlider.value = newZoom;
+        this.handleZoom(newZoom);
+      }
+
+      updateZoomButtons() {
+        this.zoomOutBtn.disabled = this.zoom <= 1;
+        this.zoomInBtn.disabled = this.zoom >= 3;
+      }
+
+      startDrag(event) {
+        if (this.faceImage.style.display === 'none') return;
+
+        this.isDragging = true;
+        this.faceContainer.classList.add('dragging');
+
+        const clientX = event.type.includes('touch') ? event.touches[0].clientX : event.clientX;
+        const clientY = event.type.includes('touch') ? event.touches[0].clientY : event.clientY;
+
+        const rect = this.faceContainer.parentElement.getBoundingClientRect();
+        this.startX = clientX - rect.left - (this.currentX / 100) * rect.width;
+        this.startY = clientY - rect.top - (this.currentY / 100) * rect.height;
+
+        event.preventDefault();
+      }
+
+      drag(event) {
+        if (!this.isDragging) return;
+
+        const clientX = event.type.includes('touch') ? event.touches[0].clientX : event.clientX;
+        const clientY = event.type.includes('touch') ? event.touches[0].clientY : event.clientY;
+
+        const rect = this.faceContainer.parentElement.getBoundingClientRect();
+        
+        const newX = ((clientX - rect.left - this.startX) / rect.width) * 100;
+        const newY = ((clientY - rect.top - this.startY) / rect.height) * 100;
+
+        this.currentX = Math.max(0, Math.min(100, newX));
+        this.currentY = Math.max(0, Math.min(100, newY));
+
+        this.faceContainer.style.left = this.currentX + '%';
+        this.faceContainer.style.top = this.currentY + '%';
+
+        event.preventDefault();
+      }
+
+      stopDrag() {
+        this.isDragging = false;
+        this.faceContainer.classList.remove('dragging');
+      }
+
+      reset() {
+        this.faceImage.src = '';
+        this.faceImage.style.display = 'none';
+        this.facePlaceholder.style.display = 'flex';
+        this.fileInput.value = '';
+        
+        this.zoom = 1;
+        this.zoomSlider.value = 1;
+        this.handleZoom(1);
+        
+        this.currentX = {{ block.settings.face_position_x }};
+        this.currentY = {{ block.settings.face_position_y }};
+        this.faceContainer.style.left = this.currentX + '%';
+        this.faceContainer.style.top = this.currentY + '%';
+      }
+    }
+
+    customElements.define('book-customizer-{{ ai_gen_id }}', BookCustomizer{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Book cover customizer",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Customize Your Book"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Upload a photo to see how it will look on your personalized book cover"
+    },
+    {
+      "type": "text",
+      "id": "upload_label",
+      "label": "Upload label",
+      "default": "Upload Photo"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Choose File"
+    },
+    {
+      "type": "header",
+      "content": "Book cover"
+    },
+    {
+      "type": "image_picker",
+      "id": "book_cover_image",
+      "label": "Book cover image"
+    },
+    {
+      "type": "range",
+      "id": "face_position_x",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Face horizontal position",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "face_position_y",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Face vertical position",
+      "default": 35
+    },
+    {
+      "type": "range",
+      "id": "face_size",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "label": "Face area size",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "face_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "label": "Face border radius",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Title size",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Container border radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Button border radius",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f7f1ed"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#170b02"
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Primary accent",
+      "default": "#5d2b09"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "preview_bg_color",
+      "label": "Preview background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button background",
+      "default": "#5d2b09"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text",
+      "default": "#f7f1ed"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_color",
+      "label": "Button hover background",
+      "default": "#98591b"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Book cover customizer"
+    }
+  ]
+}
+{% endschema %}

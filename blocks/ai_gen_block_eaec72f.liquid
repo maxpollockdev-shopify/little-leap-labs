@@ -1,0 +1,413 @@
+{% doc %}
+  @prompt
+    Add a section for the user to select hair color for their image.  I will upload 4 images and the user will need to select one.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-hair-color-selector-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    padding: 24px;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+  }
+
+  .ai-hair-color-selector__heading-{{ ai_gen_id }} {
+    margin: 0 0 16px;
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.heading_size }}px;
+  }
+
+  .ai-hair-color-selector__description-{{ ai_gen_id }} {
+    margin: 0 0 20px;
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.description_size }}px;
+    opacity: 0.8;
+  }
+
+  .ai-hair-color-selector__options-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+  }
+
+  .ai-hair-color-selector__option-{{ ai_gen_id }} {
+    position: relative;
+    cursor: pointer;
+    border-radius: {{ block.settings.option_border_radius }}px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .ai-hair-color-selector__option-{{ ai_gen_id }}:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .ai-hair-color-selector__input-{{ ai_gen_id }} {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .ai-hair-color-selector__label-{{ ai_gen_id }} {
+    display: block;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .ai-hair-color-selector__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    background-color: #f4f4f4;
+    border: 3px solid transparent;
+    border-radius: {{ block.settings.option_border_radius }}px;
+    transition: border-color 0.2s ease;
+  }
+
+  .ai-hair-color-selector__image-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-hair-color-selector__placeholder-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-hair-color-selector__placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-hair-color-selector__input-{{ ai_gen_id }}:checked + .ai-hair-color-selector__label-{{ ai_gen_id }} .ai-hair-color-selector__image-wrapper-{{ ai_gen_id }} {
+    border-color: {{ block.settings.selected_border_color }};
+  }
+
+  .ai-hair-color-selector__checkmark-{{ ai_gen_id }} {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    background-color: {{ block.settings.selected_border_color }};
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 1;
+  }
+
+  .ai-hair-color-selector__checkmark-{{ ai_gen_id }} svg {
+    width: 16px;
+    height: 16px;
+    stroke: white;
+    stroke-width: 3;
+  }
+
+  .ai-hair-color-selector__input-{{ ai_gen_id }}:checked + .ai-hair-color-selector__label-{{ ai_gen_id }} .ai-hair-color-selector__checkmark-{{ ai_gen_id }} {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .ai-hair-color-selector__option-label-{{ ai_gen_id }} {
+    display: block;
+    margin-top: 8px;
+    text-align: center;
+    font-size: {{ block.settings.label_size }}px;
+    color: {{ block.settings.text_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-hair-color-selector__options-{{ ai_gen_id }} {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+{% endstyle %}
+
+<hair-color-selector-{{ ai_gen_id }}
+  class="ai-hair-color-selector-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.heading != blank %}
+    <h3 class="ai-hair-color-selector__heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h3>
+  {% endif %}
+
+  {% if block.settings.description != blank %}
+    <p class="ai-hair-color-selector__description-{{ ai_gen_id }}">{{ block.settings.description }}</p>
+  {% endif %}
+
+  <div class="ai-hair-color-selector__options-{{ ai_gen_id }}">
+    {% for i in (1..4) %}
+      {% liquid
+        assign image_key = 'hair_color_image_' | append: i
+        assign label_key = 'hair_color_label_' | append: i
+        assign image = block.settings[image_key]
+        assign label = block.settings[label_key]
+      %}
+
+      <div class="ai-hair-color-selector__option-{{ ai_gen_id }}">
+        <input
+          type="radio"
+          id="hair-color-{{ ai_gen_id }}-{{ i }}"
+          name="hair-color-{{ ai_gen_id }}"
+          value="{{ label }}"
+          class="ai-hair-color-selector__input-{{ ai_gen_id }}"
+          {% if i == 1 %}checked{% endif %}
+        >
+        <label
+          for="hair-color-{{ ai_gen_id }}-{{ i }}"
+          class="ai-hair-color-selector__label-{{ ai_gen_id }}"
+        >
+          <div class="ai-hair-color-selector__image-wrapper-{{ ai_gen_id }}">
+            {% if image %}
+              <img
+                src="{{ image | image_url: width: 300 }}"
+                alt="{{ label | escape }}"
+                class="ai-hair-color-selector__image-{{ ai_gen_id }}"
+                loading="lazy"
+                width="300"
+                height="300"
+              >
+            {% else %}
+              <div class="ai-hair-color-selector__placeholder-{{ ai_gen_id }}">
+                {{ 'image' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+            <div class="ai-hair-color-selector__checkmark-{{ ai_gen_id }}">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+          </div>
+          {% if label != blank %}
+            <span class="ai-hair-color-selector__option-label-{{ ai_gen_id }}">{{ label }}</span>
+          {% endif %}
+        </label>
+      </div>
+    {% endfor %}
+  </div>
+</hair-color-selector-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class HairColorSelector{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.inputs = this.querySelectorAll('.ai-hair-color-selector__input-{{ ai_gen_id }}');
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        this.inputs.forEach((input) => {
+          input.addEventListener('change', (event) => {
+            const selectedValue = event.target.value;
+            this.dispatchEvent(new CustomEvent('hair-color-selected', {
+              detail: { hairColor: selectedValue },
+              bubbles: true
+            }));
+          });
+        });
+      }
+    }
+
+    customElements.define('hair-color-selector-{{ ai_gen_id }}', HairColorSelector{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Hair color selector",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Select hair color"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Choose the hair color that best matches your child"
+    },
+    {
+      "type": "header",
+      "content": "Hair color option 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "hair_color_image_1",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "hair_color_label_1",
+      "label": "Label",
+      "default": "Blonde"
+    },
+    {
+      "type": "header",
+      "content": "Hair color option 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "hair_color_image_2",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "hair_color_label_2",
+      "label": "Label",
+      "default": "Brown"
+    },
+    {
+      "type": "header",
+      "content": "Hair color option 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "hair_color_image_3",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "hair_color_label_3",
+      "label": "Label",
+      "default": "Black"
+    },
+    {
+      "type": "header",
+      "content": "Hair color option 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "hair_color_image_4",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "hair_color_label_4",
+      "label": "Label",
+      "default": "Red"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#170b02"
+    },
+    {
+      "type": "color",
+      "id": "selected_border_color",
+      "label": "Selected border color",
+      "default": "#55966e"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Container border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "option_border_radius",
+      "label": "Option border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 14,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "label": "Description size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Label size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hair color selector"
+    }
+  ]
+}
+{% endschema %}

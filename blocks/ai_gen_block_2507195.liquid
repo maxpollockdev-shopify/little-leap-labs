@@ -1,0 +1,357 @@
+{% doc %}
+  @prompt
+    A space for the user to write their Child's name
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-child-name-input-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+  }
+
+  .ai-child-name-input__wrapper-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: {{ block.settings.padding }}px;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+  }
+
+  .ai-child-name-input__label-{{ ai_gen_id }} {
+    font-family: {{ block.settings.label_font.family }}, {{ block.settings.label_font.fallback_families }};
+    font-weight: {{ block.settings.label_font.weight }};
+    font-size: {{ block.settings.label_size }}px;
+    color: {{ block.settings.label_color }};
+    margin: 0;
+  }
+
+  .ai-child-name-input__field-{{ ai_gen_id }} {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: {{ block.settings.input_font.family }}, {{ block.settings.input_font.fallback_families }};
+    font-weight: {{ block.settings.input_font.weight }};
+    font-size: {{ block.settings.input_size }}px;
+    color: {{ block.settings.input_text_color }};
+    background-color: {{ block.settings.input_background }};
+    border: {{ block.settings.input_border_width }}px solid {{ block.settings.input_border_color }};
+    border-radius: {{ block.settings.input_border_radius }}px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .ai-child-name-input__field-{{ ai_gen_id }}::placeholder {
+    color: {{ block.settings.placeholder_color }};
+    opacity: 0.7;
+  }
+
+  .ai-child-name-input__field-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.input_hover_background }};
+  }
+
+  .ai-child-name-input__field-{{ ai_gen_id }}:focus {
+    outline: none;
+    border-color: {{ block.settings.input_focus_border_color }};
+    background-color: {{ block.settings.input_background }};
+  }
+
+  .ai-child-name-input__helper-{{ ai_gen_id }} {
+    font-size: {{ block.settings.helper_text_size }}px;
+    color: {{ block.settings.helper_text_color }};
+    margin: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-child-name-input-{{ ai_gen_id }} {
+      width: 100%;
+    }
+  }
+{% endstyle %}
+
+<child-name-input-{{ ai_gen_id }}
+  class="ai-child-name-input-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-child-name-input__wrapper-{{ ai_gen_id }}">
+    {% if block.settings.label != blank %}
+      <label
+        for="child-name-{{ ai_gen_id }}"
+        class="ai-child-name-input__label-{{ ai_gen_id }}"
+      >
+        {{ block.settings.label }}
+        {% if block.settings.required %}
+          <span aria-label="required">*</span>
+        {% endif %}
+      </label>
+    {% endif %}
+
+    <input
+      type="text"
+      id="child-name-{{ ai_gen_id }}"
+      name="properties[{{ block.settings.property_name }}]"
+      class="ai-child-name-input__field-{{ ai_gen_id }}"
+      placeholder="{{ block.settings.placeholder }}"
+      {% if block.settings.required %}required{% endif %}
+      {% if block.settings.max_length > 0 %}maxlength="{{ block.settings.max_length }}"{% endif %}
+      aria-describedby="{% if block.settings.helper_text != blank %}helper-text-{{ ai_gen_id }}{% endif %}"
+    >
+
+    {% if block.settings.helper_text != blank %}
+      <p
+        id="helper-text-{{ ai_gen_id }}"
+        class="ai-child-name-input__helper-{{ ai_gen_id }}"
+      >
+        {{ block.settings.helper_text }}
+      </p>
+    {% endif %}
+  </div>
+</child-name-input-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ChildNameInput{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.input = this.querySelector('.ai-child-name-input__field-{{ ai_gen_id }}');
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        if (!this.input) return;
+
+        this.input.addEventListener('input', (e) => {
+          const value = e.target.value;
+          this.dispatchEvent(new CustomEvent('childNameChange', {
+            detail: { value: value },
+            bubbles: true
+          }));
+        });
+      }
+    }
+
+    customElements.define('child-name-input-{{ ai_gen_id }}', ChildNameInput{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Child name input",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "Child's name"
+    },
+    {
+      "type": "text",
+      "id": "placeholder",
+      "label": "Placeholder text",
+      "default": "Enter your child's name"
+    },
+    {
+      "type": "text",
+      "id": "helper_text",
+      "label": "Helper text"
+    },
+    {
+      "type": "text",
+      "id": "property_name",
+      "label": "Property name",
+      "default": "Child Name",
+      "info": "This name will appear in order details"
+    },
+    {
+      "type": "checkbox",
+      "id": "required",
+      "label": "Required field",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "max_length",
+      "label": "Maximum characters",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 50,
+      "info": "Set to 0 for no limit"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Padding",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Label style"
+    },
+    {
+      "type": "font_picker",
+      "id": "label_font",
+      "label": "Font",
+      "default": "sans-serif"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Color",
+      "default": "#55966e"
+    },
+    {
+      "type": "header",
+      "content": "Input field style"
+    },
+    {
+      "type": "font_picker",
+      "id": "input_font",
+      "label": "Font",
+      "default": "sans-serif"
+    },
+    {
+      "type": "range",
+      "id": "input_size",
+      "label": "Size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "input_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "input_hover_background",
+      "label": "Hover background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "placeholder_color",
+      "label": "Placeholder color",
+      "default": "#999999"
+    },
+    {
+      "type": "range",
+      "id": "input_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "input_border_color",
+      "label": "Border color",
+      "default": "#5d2b09"
+    },
+    {
+      "type": "color",
+      "id": "input_focus_border_color",
+      "label": "Focus border color",
+      "default": "#55966e"
+    },
+    {
+      "type": "range",
+      "id": "input_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Helper text style"
+    },
+    {
+      "type": "range",
+      "id": "helper_text_size",
+      "label": "Size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "helper_text_color",
+      "label": "Color",
+      "default": "#615a55"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Child name input"
+    }
+  ]
+}
+{% endschema %}

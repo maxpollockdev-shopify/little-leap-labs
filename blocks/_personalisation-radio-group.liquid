@@ -5,6 +5,8 @@
   assign property_name = 'properties[custom-property]' | replace: 'custom-property', property_key
   assign product_form_id = 'BuyButtons-ProductForm-section.id' | replace: 'section.id', section.id
   assign block_id = block.id | replace: '_', '' | downcase
+  assign option_group = block_settings.option_group
+  assign group_entries = option_group.options.value
 -%}
 
 <div
@@ -32,21 +34,20 @@
 
     <div class="personalisation-field__options">
       {% assign is_first_option = true %}
-      {% for i in (1..4) %}
+      {% for entry in group_entries %}
         {% liquid
-          assign image_key = 'option_image_' | append: i
-          assign label_key = 'option_label_' | append: i
-          assign image = block_settings[image_key]
-          assign label = block_settings[label_key]
+          assign option_name = entry.option_name.value
+          assign option_image = entry.image.value
+          assign option_id = entry.system.handle | default: forloop.index
         %}
 
-        {% if label != blank %}
+        {% if option_name != blank %}
           <div class="personalisation-field__option">
             <input
               type="radio"
-              id="personalisation-radio-{{ block_id }}-{{ i }}"
+              id="personalisation-radio-{{ block_id }}-{{ option_id }}"
               name="{{ property_name }}"
-              value="{{ label | escape }}"
+              value="{{ option_name | escape }}"
               class="personalisation-field__radio-input"
               form="{{ product_form_id }}"
               {% if block_settings.required and is_first_option %}
@@ -57,18 +58,18 @@
             {% assign is_first_option = false %}
             <label
               class="personalisation-field__radio-label"
-              for="personalisation-radio-{{ block_id }}-{{ i }}"
+              for="personalisation-radio-{{ block_id }}-{{ option_id }}"
             >
               <span class="personalisation-field__option-image-wrapper">
-                {% if image %}
+                {% if option_image %}
                   {{
-                    image
+                    option_image
                     | image_url: width: 300
                     | image_tag:
                       class: 'personalisation-field__option-image',
                       loading: 'lazy',
                       widths: '150, 300',
-                      alt: label
+                      alt: option_name
                   }}
                 {% else %}
                   <span class="personalisation-field__option-placeholder">
@@ -76,7 +77,7 @@
                   </span>
                 {% endif %}
               </span>
-              <span class="personalisation-field__option-label">{{ label | escape }}</span>
+              <span class="personalisation-field__option-label">{{ option_name | escape }}</span>
             </label>
           </div>
         {% endif %}
@@ -127,63 +128,14 @@
     },
     {
       "type": "header",
-      "content": "t:settings.personalisation_radio.option_1"
+      "content": "t:settings.personalisation_radio.options"
     },
     {
-      "type": "image_picker",
-      "id": "option_image_1",
-      "label": "t:settings.personalisation_radio.image"
-    },
-    {
-      "type": "text",
-      "id": "option_label_1",
-      "label": "t:settings.personalisation_radio.label",
-      "default": "t:settings.personalisation_radio.default_option_1"
-    },
-    {
-      "type": "header",
-      "content": "t:settings.personalisation_radio.option_2"
-    },
-    {
-      "type": "image_picker",
-      "id": "option_image_2",
-      "label": "t:settings.personalisation_radio.image"
-    },
-    {
-      "type": "text",
-      "id": "option_label_2",
-      "label": "t:settings.personalisation_radio.label",
-      "default": "t:settings.personalisation_radio.default_option_2"
-    },
-    {
-      "type": "header",
-      "content": "t:settings.personalisation_radio.option_3"
-    },
-    {
-      "type": "image_picker",
-      "id": "option_image_3",
-      "label": "t:settings.personalisation_radio.image"
-    },
-    {
-      "type": "text",
-      "id": "option_label_3",
-      "label": "t:settings.personalisation_radio.label",
-      "default": "t:settings.personalisation_radio.default_option_3"
-    },
-    {
-      "type": "header",
-      "content": "t:settings.personalisation_radio.option_4"
-    },
-    {
-      "type": "image_picker",
-      "id": "option_image_4",
-      "label": "t:settings.personalisation_radio.image"
-    },
-    {
-      "type": "text",
-      "id": "option_label_4",
-      "label": "t:settings.personalisation_radio.label",
-      "default": "t:settings.personalisation_radio.default_option_4"
+      "type": "metaobject",
+      "id": "option_group",
+      "label": "t:settings.personalisation_radio.option_group",
+      "metaobject_type": "personalisation_option_group",
+      "info": "t:settings.personalisation_radio.option_group_info"
     },
     {
       "type": "header",

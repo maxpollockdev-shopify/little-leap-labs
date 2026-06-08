@@ -433,37 +433,97 @@
     background: var(--plll-green-dark);
   }
 
-  .personalisation-field__crop-controls {
+  .personalisation:has(.personalisation-field--photo-editing) {
+    overflow: visible;
+  }
+
+  .personalisation-field--photo-editing {
+    overflow: visible;
+  }
+
+  .personalisation-field__media {
     display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
+    justify-content: center;
     width: 100%;
   }
 
-  .personalisation-field__crop-controls[hidden] {
+  .personalisation-field__edit-frame {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  .personalisation-field--photo-editing .personalisation-field__preview {
+    margin-bottom: 0;
+  }
+
+  .personalisation-field__zoom-controls {
+    position: absolute;
+    top: 0;
+    left: calc(100% + 0.35rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    height: 100%;
+    padding-inline-start: 0.15rem;
+    border-inline-start: 1px dashed rgb(93 43 9 / 0.15);
+  }
+
+  .personalisation-field__zoom-controls[hidden] {
     display: none;
   }
 
   .personalisation-field__zoom-label {
     font-family: var(--font-subheading--family);
-    font-size: 1rem;
+    font-size: 0.85rem;
+    line-height: 1;
     color: var(--plll-brown);
   }
 
   .personalisation-field__zoom-input {
-    width: 100%;
+    flex: 1 1 auto;
+    width: 1.25rem;
+    min-height: 5rem;
+    height: auto;
+    margin: 0;
     accent-color: var(--plll-green);
+    writing-mode: vertical-lr;
+    direction: rtl;
+    -webkit-appearance: slider-vertical;
+    appearance: slider-vertical;
+  }
+
+  .personalisation-field__crop-hint {
+    width: 100%;
+    margin: 0.35rem 0 0;
+    font-family: var(--font-subheading--family);
+    font-size: 0.85rem;
+    line-height: 1.35;
+    text-align: center;
+    color: rgb(23 11 2 / 0.65);
+  }
+
+  .personalisation-field__crop-hint[hidden] {
+    display: none;
   }
 
   .personalisation-field__crop-actions {
     display: flex;
     gap: 0.5rem;
     width: 100%;
+    margin-top: 0.65rem;
+  }
+
+  .personalisation-field__crop-actions[hidden] {
+    display: none;
   }
 
   .personalisation-field__crop-actions .personalisation-field__button {
     flex: 1;
     width: auto;
+    max-width: 280px;
+    margin-inline: auto;
   }
 
   .personalisation-field__button--save {

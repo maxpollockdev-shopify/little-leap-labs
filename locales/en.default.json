@@ -300,7 +300,10 @@
       "edit_photo": "Edit",
       "save_photo": "Save",
       "cancel_edit": "Cancel",
-      "zoom": "Zoom"
+      "zoom": "Zoom",
+      "drag_to_crop": "Drag the image to crop",
+      "view_upload": "View full size photo",
+      "view_customization": "View Customization"
     }
   },
   "fields": {

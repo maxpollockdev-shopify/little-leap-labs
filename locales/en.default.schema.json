@@ -1096,16 +1096,9 @@
       "default_badge": "Pick one",
       "description": "Helper text",
       "default_property_key": "Selection",
-      "option_1": "Option 1",
-      "option_2": "Option 2",
-      "option_3": "Option 3",
-      "option_4": "Option 4",
-      "image": "Image",
-      "label": "Label",
-      "default_option_1": "Option 1",
-      "default_option_2": "Option 2",
-      "default_option_3": "Option 3",
-      "default_option_4": "Option 4"
+      "options": "Options",
+      "option_group": "Option group",
+      "option_group_info": "Select a personalisation option group. Each entry in the group needs an option name and image."
     },
     // Checkbox setting to enable quick add to cart from product cards
     "quick_add": "Quick add",

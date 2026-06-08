@@ -1,6 +1,11 @@
 const PREVIEW_DIMENSIONS = {
   headshot: { width: 800, height: 800 },
-  landscape: { width: 1200, height: 600 },
+  landscape: { width: 1800, height: 900 },
+};
+
+const EXPORT_QUALITY = {
+  headshot: 0.92,
+  landscape: 0.95,
 };
 
 class PersonalisationPhotoField {
@@ -14,7 +19,9 @@ class PersonalisationPhotoField {
     this.canvas = root.querySelector('[data-photo-canvas]');
     this.editButton = root.querySelector('[data-photo-edit]');
     this.actions = root.querySelector('[data-photo-actions]');
-    this.cropControls = root.querySelector('[data-photo-crop-controls]');
+    this.zoomControls = root.querySelector('[data-photo-zoom-controls]');
+    this.cropHint = root.querySelector('[data-photo-crop-hint]');
+    this.cropActions = root.querySelector('[data-photo-crop-actions]');
     this.zoomInput = root.querySelector('[data-photo-zoom]');
     this.saveButton = root.querySelector('[data-photo-save]');
     this.cancelButton = root.querySelector('[data-photo-cancel]');
@@ -70,8 +77,16 @@ class PersonalisationPhotoField {
       this.editButton.hidden = !hasImage || isEditing;
     }
 
-    if (this.cropControls instanceof HTMLElement) {
-      this.cropControls.hidden = !isEditing;
+    if (this.zoomControls instanceof HTMLElement) {
+      this.zoomControls.hidden = !isEditing;
+    }
+
+    if (this.cropHint instanceof HTMLElement) {
+      this.cropHint.hidden = !isEditing;
+    }
+
+    if (this.cropActions instanceof HTMLElement) {
+      this.cropActions.hidden = !isEditing;
     }
 
     if (this.canvas instanceof HTMLCanvasElement) {
@@ -307,7 +322,7 @@ class PersonalisationPhotoField {
         croppedImage.src = this.previewObjectUrl;
       },
       'image/jpeg',
-      0.92
+      EXPORT_QUALITY[this.previewMode]
     );
   }
 }

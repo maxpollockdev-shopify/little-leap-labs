@@ -1,0 +1,97 @@
+{%- doc -%}
+  Renders visible line item properties for a cart item.
+
+  @param {object} item - The cart line item.
+
+  @example
+  {% render 'cart-line-item-properties', item: item %}
+{%- enddoc -%}
+
+{%- liquid
+  assign has_visible_properties = false
+  for property in item.properties
+    assign property_first_char = property.first | slice: 0
+    if property.last != blank and property_first_char != '_'
+      assign has_visible_properties = true
+      break
+    endif
+  endfor
+-%}
+
+{%- if has_visible_properties -%}
+  <details class="cart-items__customization">
+    <summary class="cart-items__customization-summary">
+      <span class="cart-items__customization-intro">
+        <span class="cart-items__customization-sparkle" aria-hidden="true"></span>
+        <span class="cart-items__customization-title">{{ 'content.personalisation.view_customization' | t }}</span>
+      </span>
+      <span class="svg-wrapper icon-caret icon-animated">
+        {{- 'icon-caret.svg' | inline_asset_content -}}
+      </span>
+    </summary>
+    <div class="cart-items__customization-fields">
+      <dl class="cart-items__properties">
+        {%- for property in item.properties -%}
+          {%- assign property_first_char = property.first | slice: 0 -%}
+          {%- if property.last != blank and property_first_char != '_' -%}
+            {%- liquid
+              assign property_value = property.last
+              assign is_upload = false
+              if property_value contains '/uploads/'
+                assign is_upload = true
+              endif
+            -%}
+            <div class="cart-items__property{% if is_upload %} cart-items__property--photo{% else %} cart-items__property--text{% endif %}">
+              <dt class="cart-items__property-label">{{ property.first | escape }}</dt>
+              <dd class="cart-items__property-value">
+                {%- if is_upload -%}
+                  <div class="cart-items__property-preview">
+                    <button
+                      type="button"
+                      class="cart-items__property-image-link button-unstyled"
+                      data-cart-property-image-trigger
+                      aria-haspopup="dialog"
+                      aria-label="{{ 'content.personalisation.view_upload' | t | escape }}"
+                    >
+                      <img
+                        src="{{ property_value }}"
+                        alt="{{ property.first | escape }}"
+                        class="cart-items__property-image"
+                        loading="lazy"
+                        width="72"
+                        height="48"
+                      >
+                    </button>
+                  </div>
+                  <dialog
+                    class="cart-items__property-preview-dialog dialog-modal color-{{ settings.popover_color_scheme }}"
+                    aria-label="{{ property.first | escape }}"
+                  >
+                    <img
+                      src="{{ property_value }}"
+                      alt="{{ property.first | escape }}"
+                      class="cart-items__property-preview-dialog-image"
+                      loading="lazy"
+                      width="960"
+                      height="640"
+                    >
+                    <button
+                      type="button"
+                      class="button button-unstyled close-button cart-items__property-preview-close"
+                      data-cart-property-image-close
+                      aria-label="{{ 'accessibility.close_dialog' | t | escape }}"
+                    >
+                      {{- 'icon-close.svg' | inline_asset_content -}}
+                    </button>
+                  </dialog>
+                {%- else -%}
+                  <span class="cart-items__property-text">{{ property_value | escape }}</span>
+                {%- endif -%}
+              </dd>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </dl>
+    </div>
+  </details>
+{%- endif -%}

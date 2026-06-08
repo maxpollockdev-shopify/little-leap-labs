@@ -37,39 +37,64 @@
     </p>
   {% endif %}
 
-  <div
-    class="personalisation-field__preview personalisation-field__preview--{{ preview_mode }}"
-    data-photo-preview
-  >
-    <img
-      class="personalisation-field__preview-image"
-      data-photo-preview-image
-      alt=""
-      width="{{ preview_image_width }}"
-      height="{{ preview_image_height }}"
-      hidden
-    >
-    <canvas
-      class="personalisation-field__preview-canvas"
-      data-photo-canvas
-      width="{{ preview_image_width }}"
-      height="{{ preview_image_height }}"
-      hidden
-    ></canvas>
-    <div class="personalisation-field__preview-placeholder" data-photo-preview-placeholder>
-      <svg
-        class="personalisation-field__preview-icon"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
+  <div class="personalisation-field__media">
+    <div class="personalisation-field__edit-frame">
+      <div
+        class="personalisation-field__preview personalisation-field__preview--{{ preview_mode }}"
+        data-photo-preview
       >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-      <p class="personalisation-field__preview-text">{{ block_settings.preview_placeholder | escape }}</p>
+        <img
+          class="personalisation-field__preview-image"
+          data-photo-preview-image
+          alt=""
+          width="{{ preview_image_width }}"
+          height="{{ preview_image_height }}"
+          hidden
+        >
+        <canvas
+          class="personalisation-field__preview-canvas"
+          data-photo-canvas
+          width="{{ preview_image_width }}"
+          height="{{ preview_image_height }}"
+          hidden
+        ></canvas>
+        <div class="personalisation-field__preview-placeholder" data-photo-preview-placeholder>
+          <svg
+            class="personalisation-field__preview-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <p class="personalisation-field__preview-text">{{ block_settings.preview_placeholder | escape }}</p>
+        </div>
+      </div>
+
+      <div class="personalisation-field__zoom-controls" data-photo-zoom-controls hidden>
+        <label class="personalisation-field__zoom-label" for="PersonalisationPhotoZoom-{{ block.id }}">
+          {{ 'content.personalisation.zoom' | t }}
+        </label>
+        <input
+          type="range"
+          id="PersonalisationPhotoZoom-{{ block.id }}"
+          class="personalisation-field__zoom-input"
+          data-photo-zoom
+          min="1"
+          max="3"
+          step="0.1"
+          value="1"
+          orient="vertical"
+        >
+      </div>
     </div>
   </div>
+
+  <p class="personalisation-field__crop-hint" data-photo-crop-hint hidden>
+    {{ 'content.personalisation.drag_to_crop' | t }}
+  </p>
 
   <input
     type="file"
@@ -99,28 +124,13 @@
     </button>
   </div>
 
-  <div class="personalisation-field__crop-controls" data-photo-crop-controls hidden>
-    <label class="personalisation-field__zoom-label" for="PersonalisationPhotoZoom-{{ block.id }}">
-      {{ 'content.personalisation.zoom' | t }}
-    </label>
-    <input
-      type="range"
-      id="PersonalisationPhotoZoom-{{ block.id }}"
-      class="personalisation-field__zoom-input"
-      data-photo-zoom
-      min="1"
-      max="3"
-      step="0.1"
-      value="1"
-    >
-    <div class="personalisation-field__crop-actions">
-      <button type="button" class="personalisation-field__button personalisation-field__button--save" data-photo-save>
-        {{ block_settings.save_button_text | escape }}
-      </button>
-      <button type="button" class="personalisation-field__button personalisation-field__button--cancel" data-photo-cancel>
-        {{ block_settings.cancel_button_text | escape }}
-      </button>
-    </div>
+  <div class="personalisation-field__crop-actions" data-photo-crop-actions hidden>
+    <button type="button" class="personalisation-field__button personalisation-field__button--save" data-photo-save>
+      {{ block_settings.save_button_text | escape }}
+    </button>
+    <button type="button" class="personalisation-field__button personalisation-field__button--cancel" data-photo-cancel>
+      {{ block_settings.cancel_button_text | escape }}
+    </button>
   </div>
 </div>
 

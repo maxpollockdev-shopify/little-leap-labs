@@ -1,12 +1,34 @@
-const PREVIEW_DIMENSIONS = {
+const EDIT_DIMENSIONS = {
   headshot: { width: 800, height: 800 },
-  landscape: { width: 1800, height: 900 },
+  landscape: { width: 1200, height: 600 },
+};
+
+const EXPORT_DIMENSIONS = {
+  headshot: { width: 1600, height: 1600 },
+  landscape: { width: 2400, height: 1200 },
 };
 
 const EXPORT_QUALITY = {
-  headshot: 0.92,
-  landscape: 0.95,
+  headshot: 0.95,
+  landscape: 0.97,
 };
+
+/** @type {Map<string, PersonalisationPhotoField[]>} */
+const fieldsByFormId = new Map();
+
+/**
+ * Exports pending personalisation photos associated with a product form.
+ * @param {string} formId
+ * @returns {Promise<void>}
+ */
+export function preparePersonalisationPhotosForForm(formId) {
+  const fields = fieldsByFormId.get(formId) ?? [];
+  return Promise.all(fields.map((field) => field.ensureExported())).then(() => undefined);
+}
+
+if (typeof window !== 'undefined') {
+  window.preparePersonalisationPhotosForForm = preparePersonalisationPhotosForForm;
+}
 
 class PersonalisationPhotoField {
   /** @param {HTMLElement} root */
@@ -31,6 +53,10 @@ class PersonalisationPhotoField {
     }
 
     this.ctx = this.canvas.getContext('2d');
+    if (this.ctx) {
+      this.ctx.imageSmoothingEnabled = true;
+      this.ctx.imageSmoothingQuality = 'high';
+    }
     this.image = null;
     this.scale = 1;
     this.offsetX = 0;
@@ -40,10 +66,22 @@ class PersonalisationPhotoField {
     this.dragStartY = 0;
     this.previewObjectUrl = null;
     this.currentFileName = 'photo.jpg';
+    this.needsExport = false;
+    this.hasExportedCrop = false;
+    this.#formId = this.fileInput.getAttribute('form');
+
+    if (this.#formId) {
+      const fields = fieldsByFormId.get(this.#formId) ?? [];
+      fields.push(this);
+      fieldsByFormId.set(this.#formId, fields);
+    }
 
     this.bindEvents();
     this.setUiState('empty');
   }
+
+  /** @type {string | null} */
+  #formId = null;
 
   bindEvents() {
     this.fileInput.addEventListener('change', () => this.handleFileSelect());
@@ -112,6 +150,8 @@ class PersonalisationPhotoField {
 
     this.currentFileName = file.name;
     this.loadImageFromFile(file).then(() => {
+      this.needsExport = true;
+      this.hasExportedCrop = false;
       this.updatePreviewFromFile(file);
       this.setUiState('preview');
     });
@@ -153,6 +193,8 @@ class PersonalisationPhotoField {
       this.previewPlaceholder.hidden = false;
     }
 
+    this.needsExport = false;
+    this.hasExportedCrop = false;
     this.setUiState('empty');
   }
 
@@ -185,9 +227,42 @@ class PersonalisationPhotoField {
   }
 
   setupCanvasSize() {
-    const dimensions = PREVIEW_DIMENSIONS[this.previewMode];
+    const dimensions = EDIT_DIMENSIONS[this.previewMode];
     this.canvas.width = dimensions.width;
     this.canvas.height = dimensions.height;
+  }
+
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {HTMLCanvasElement} canvas
+   * @param {HTMLImageElement} image
+   * @param {number} scale
+   * @param {number} offsetX
+   * @param {number} offsetY
+   */
+  drawImageToCanvas(ctx, canvas, image, scale, offsetX, offsetY) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#fff9f2';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const imageAspect = image.width / image.height;
+    const canvasAspect = canvas.width / canvas.height;
+
+    let drawWidth;
+    let drawHeight;
+
+    if (imageAspect > canvasAspect) {
+      drawHeight = canvas.height * scale;
+      drawWidth = drawHeight * imageAspect;
+    } else {
+      drawWidth = canvas.width * scale;
+      drawHeight = drawWidth / imageAspect;
+    }
+
+    const x = (canvas.width - drawWidth) / 2 + offsetX;
+    const y = (canvas.height - drawHeight) / 2 + offsetY;
+
+    ctx.drawImage(image, x, y, drawWidth, drawHeight);
   }
 
   startEditing() {
@@ -206,40 +281,23 @@ class PersonalisationPhotoField {
     }
 
     this.endDrag();
+    this.resetTransform();
+    if (this.hasExportedCrop) {
+      this.needsExport = false;
+    }
     this.setUiState('preview');
   }
 
   handleZoom() {
     if (!(this.zoomInput instanceof HTMLInputElement)) return;
     this.scale = parseFloat(this.zoomInput.value);
+    this.needsExport = true;
     this.drawImage();
   }
 
   drawImage() {
     if (!this.image || !this.ctx) return;
-
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.fillStyle = '#fff9f2';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    const imageAspect = this.image.width / this.image.height;
-    const canvasAspect = this.canvas.width / this.canvas.height;
-
-    let drawWidth;
-    let drawHeight;
-
-    if (imageAspect > canvasAspect) {
-      drawHeight = this.canvas.height * this.scale;
-      drawWidth = drawHeight * imageAspect;
-    } else {
-      drawWidth = this.canvas.width * this.scale;
-      drawHeight = drawWidth / imageAspect;
-    }
-
-    const x = (this.canvas.width - drawWidth) / 2 + this.offsetX;
-    const y = (this.canvas.height - drawHeight) / 2 + this.offsetY;
-
-    this.ctx.drawImage(this.image, x, y, drawWidth, drawHeight);
+    this.drawImageToCanvas(this.ctx, this.canvas, this.image, this.scale, this.offsetX, this.offsetY);
   }
 
   /** @param {MouseEvent | TouchEvent} event */
@@ -261,6 +319,7 @@ class PersonalisationPhotoField {
     const position = this.getEventPosition(event);
     this.offsetX = position.x - this.dragStartX;
     this.offsetY = position.y - this.dragStartY;
+    this.needsExport = true;
     this.drawImage();
   }
 
@@ -286,44 +345,112 @@ class PersonalisationPhotoField {
   saveCrop() {
     if (!this.image) return;
 
-    this.canvas.toBlob(
-      (blob) => {
-        if (!blob) return;
+    this.exportCrop({ updateUi: true }).catch((error) => {
+      console.error(error);
+    });
+  }
 
-        const extension = this.currentFileName.split('.').pop()?.toLowerCase();
-        const mimeType = extension === 'png' ? 'image/png' : 'image/jpeg';
-        const fileName =
-          mimeType === 'image/png'
+  /**
+   * Ensures the file input contains an exported crop before add to cart.
+   * @returns {Promise<void>}
+   */
+  ensureExported() {
+    if (!this.image || !this.needsExport) {
+      return Promise.resolve();
+    }
+
+    return this.exportCrop({ updateUi: false }).then(() => undefined);
+  }
+
+  /**
+   * @param {{ updateUi?: boolean }} [options]
+   * @returns {Promise<boolean>}
+   */
+  exportCrop({ updateUi = false } = {}) {
+    if (!this.image) {
+      return Promise.resolve(false);
+    }
+
+    const editDims = EDIT_DIMENSIONS[this.previewMode];
+    const exportDims = EXPORT_DIMENSIONS[this.previewMode];
+    const scaleFactor = exportDims.width / editDims.width;
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = exportDims.width;
+    exportCanvas.height = exportDims.height;
+
+    const exportCtx = exportCanvas.getContext('2d');
+    if (!exportCtx) {
+      return Promise.reject(new Error('Unable to export personalisation photo'));
+    }
+
+    exportCtx.imageSmoothingEnabled = true;
+    exportCtx.imageSmoothingQuality = 'high';
+
+    this.drawImageToCanvas(
+      exportCtx,
+      exportCanvas,
+      this.image,
+      this.scale,
+      this.offsetX * scaleFactor,
+      this.offsetY * scaleFactor
+    );
+
+    const extension = this.currentFileName.split('.').pop()?.toLowerCase();
+    const usePng = extension === 'png';
+    const mimeType = usePng ? 'image/png' : 'image/jpeg';
+    const quality = usePng ? undefined : EXPORT_QUALITY[this.previewMode];
+
+    return new Promise((resolve, reject) => {
+      exportCanvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error('Failed to export personalisation photo'));
+            return;
+          }
+
+          const fileName = usePng
             ? this.currentFileName.replace(/\.[^.]+$/, '') + '.png'
             : this.currentFileName.replace(/\.[^.]+$/, '') + '.jpg';
 
-        const croppedFile = new File([blob], fileName, { type: mimeType });
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(croppedFile);
-        this.fileInput.files = dataTransfer.files;
-        this.currentFileName = fileName;
+          const croppedFile = new File([blob], fileName, { type: mimeType });
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(croppedFile);
+          this.fileInput.files = dataTransfer.files;
+          this.currentFileName = fileName;
+          this.needsExport = false;
+          this.hasExportedCrop = true;
 
-        if (this.previewObjectUrl) {
-          URL.revokeObjectURL(this.previewObjectUrl);
-        }
+          if (updateUi) {
+            if (this.previewObjectUrl) {
+              URL.revokeObjectURL(this.previewObjectUrl);
+            }
 
-        this.previewObjectUrl = URL.createObjectURL(blob);
+            this.previewObjectUrl = URL.createObjectURL(blob);
 
-        if (this.previewImage instanceof HTMLImageElement) {
-          this.previewImage.src = this.previewObjectUrl;
-          this.previewImage.alt = fileName;
-        }
+            if (this.previewImage instanceof HTMLImageElement) {
+              this.previewImage.src = this.previewObjectUrl;
+              this.previewImage.alt = fileName;
+            }
 
-        const croppedImage = new Image();
-        croppedImage.onload = () => {
-          this.image = croppedImage;
-          this.cancelEditing();
-        };
-        croppedImage.src = this.previewObjectUrl;
-      },
-      'image/jpeg',
-      EXPORT_QUALITY[this.previewMode]
-    );
+            const croppedImage = new Image();
+            croppedImage.onload = () => {
+              this.image = croppedImage;
+              this.cancelEditing();
+              resolve(true);
+            };
+            croppedImage.onerror = () => {
+              reject(new Error('Failed to load exported personalisation photo'));
+            };
+            croppedImage.src = this.previewObjectUrl;
+            return;
+          }
+
+          resolve(true);
+        },
+        mimeType,
+        quality
+      );
+    });
   }
 }
 

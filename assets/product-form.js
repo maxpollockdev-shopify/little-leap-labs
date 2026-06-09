@@ -295,7 +295,47 @@ class ProductFormComponent extends Component {
       return;
     }
 
-    this.#processAddToCart(undefined, undefined, event);
+    void this.#prepareAndProcessAddToCart(undefined, undefined, event);
+  }
+
+  /**
+   * @param {string} [overrideVariantId]
+   * @param {number} [overrideQuantity]
+   * @param {Event} [event]
+   */
+  async #prepareAndProcessAddToCart(overrideVariantId, overrideQuantity, event) {
+    const form = this.querySelector('form');
+    const preparePhotos = /** @type {Window & { preparePersonalisationPhotosForForm?: (formId: string) => Promise<void> }} */ (
+      window
+    ).preparePersonalisationPhotosForForm;
+
+    if (form?.id && typeof preparePhotos === 'function') {
+      const allAddToCartContainers = /** @type {NodeListOf<AddToCartComponent>} */ (
+        this.querySelectorAll('add-to-cart-component')
+      );
+
+      for (const container of allAddToCartContainers) {
+        container.disable();
+      }
+
+      try {
+        await preparePhotos(form.id);
+      } catch (error) {
+        console.error(error);
+
+        for (const container of allAddToCartContainers) {
+          container.enable();
+        }
+
+        return;
+      }
+
+      for (const container of allAddToCartContainers) {
+        container.enable();
+      }
+    }
+
+    this.#processAddToCart(overrideVariantId, overrideQuantity, event);
   }
 
   /** @returns {string | undefined} */

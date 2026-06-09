@@ -295,6 +295,7 @@
     "product_custom_property_character_count": "{{ used_chars }}/{{ max_chars }} characters used",
     "personalisation": {
       "error_text": "Please fill this in",
+      "character_count": "{{ used_chars }}/{{ max_chars }} characters",
       "error_photo": "Please upload a photo",
       "error_radio": "Please pick an option",
       "edit_photo": "Edit",

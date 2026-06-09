@@ -10,6 +10,7 @@
 <div
   class="personalisation-field personalisation-field--text spacing-style"
   style="{% render 'spacing-style', settings: block_settings %}"
+  data-personalisation-text
   data-error-message="{{ 'content.personalisation.error_text' | t | escape }}"
   {{ block.shopify_attributes }}
 >
@@ -26,26 +27,42 @@
     </label>
   {% endif %}
 
-  {% if block_settings.description != blank %}
-    <p class="personalisation-field__description">
-      {{ block_settings.description | escape }}
+  <div class="personalisation-field__input-wrapper">
+    <input
+      type="text"
+      id="{{ element_id }}"
+      name="{{ property_name }}"
+      class="personalisation-field__input"
+      form="{{ product_form_id }}"
+      placeholder="{{ block_settings.placeholder | escape }}"
+      maxlength="{{ block_settings.max_length }}"
+      data-personalisation-text-input
+      aria-describedby="{{ element_id }}-char-count"
+      {% if block_settings.required %}
+        required
+        aria-required="true"
+      {% endif %}
+    >
+    <p
+      id="{{ element_id }}-char-count"
+      class="personalisation-field__char-count"
+      data-char-count
+      data-template="{{ 'content.personalisation.character_count' | t: used_chars: '[current]', max_chars: '[max]' | escape }}"
+      aria-live="polite"
+    >
+      {{
+        'content.personalisation.character_count'
+        | t: used_chars: 0, max_chars: block_settings.max_length
+      }}
     </p>
-  {% endif %}
-
-  <input
-    type="text"
-    id="{{ element_id }}"
-    name="{{ property_name }}"
-    class="personalisation-field__input"
-    form="{{ product_form_id }}"
-    placeholder="{{ block_settings.placeholder | escape }}"
-    maxlength="{{ block_settings.max_length }}"
-    {% if block_settings.required %}
-      required
-      aria-required="true"
-    {% endif %}
-  >
+  </div>
 </div>
+
+<script
+  src="{{ 'personalisation-text.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
 
 {% schema %}
 {
@@ -68,11 +85,6 @@
       "id": "heading",
       "label": "t:settings.personalisation_text.heading",
       "default": "t:settings.personalisation_text.default_heading"
-    },
-    {
-      "type": "text",
-      "id": "description",
-      "label": "t:settings.personalisation_text.description"
     },
     {
       "type": "text",

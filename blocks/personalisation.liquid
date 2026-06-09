@@ -259,6 +259,26 @@
     transform: scale(1.01);
   }
 
+  .personalisation-field__input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: 100%;
+  }
+
+  .personalisation-field__char-count {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    text-align: right;
+    color: rgb(23 11 2 / 0.55);
+  }
+
+  .personalisation-field--at-max .personalisation-field__char-count {
+    color: var(--plll-brown);
+    font-weight: 600;
+  }
+
   .personalisation-field__input:user-invalid {
     border-style: solid;
     border-color: var(--plll-error);
@@ -354,7 +374,7 @@
   }
 
   .personalisation-field__preview--landscape {
-    width: 18rem;
+    width: 22rem;
     aspect-ratio: 6 / 3;
     border-radius: 14px;
     transform: rotate(-0.5deg);
@@ -466,7 +486,6 @@
     gap: 0.25rem;
     height: 100%;
     padding-inline-start: 0.15rem;
-    border-inline-start: 1px dashed rgb(93 43 9 / 0.15);
   }
 
   .personalisation-field__zoom-controls[hidden] {
@@ -593,6 +612,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
     width: 100%;
     padding: 0.75rem 1.25rem;
     border: 2px solid var(--plll-brown);

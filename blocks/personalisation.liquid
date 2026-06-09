@@ -121,7 +121,7 @@
     right: -0.1em;
     bottom: 0.05em;
     height: 0.45em;
-    background: rgb(246 187 18 / 0.45);
+    background: #f6bb124d;
     border-radius: 0.2em;
     z-index: -1;
     transform: rotate(-1.5deg);
@@ -333,9 +333,9 @@
 
   .personalisation-field__preview {
     position: relative;
-    width: 100%;
-    margin: 0.25rem auto 0;
-    margin-bottom: 0.5rem;
+    width: 11.5rem;
+    max-width: 100%;
+    margin: .25rem auto 1rem;
     overflow: hidden;
     border: 3px dashed var(--plll-yellow);
     background:
@@ -348,17 +348,16 @@
   }
 
   .personalisation-field__preview--headshot {
-    max-width: 11.5rem;
     aspect-ratio: 1;
     border-radius: 50%;
     transform: rotate(-2deg);
   }
 
   .personalisation-field__preview--landscape {
-    max-width: 85%;
+    width: 18rem;
     aspect-ratio: 6 / 3;
     border-radius: 14px;
-    transform: rotate(-.5deg);
+    transform: rotate(-0.5deg);
   }
 
   .personalisation-field--photo:hover .personalisation-field__preview--headshot {

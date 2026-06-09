@@ -1,12 +1,3 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "sections": {
     "main": {
@@ -189,95 +180,6 @@
                 "price_tVjtKg"
               ]
             },
-            "personalisation_4HEyVE": {
-              "type": "personalisation",
-              "name": "t:names.personalisation",
-              "settings": {
-                "heading": "Make this DADVenture yours!",
-                "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {
-                "personalisation_text_PByjmQ": {
-                  "type": "_personalisation-text",
-                  "settings": {
-                    "badge": "",
-                    "heading": "What is Dad's name?",
-                    "description": "Maximum 100 characters",
-                    "property_key": "Dad's Name",
-                    "placeholder": "Enter a name",
-                    "max_length": 100,
-                    "required": true,
-                    "padding-block-start": 15,
-                    "padding-block-end": 15,
-                    "padding-inline-start": 15,
-                    "padding-inline-end": 15
-                  },
-                  "blocks": {}
-                },
-                "personalisation_photo_GTUXna": {
-                  "type": "_personalisation-photo",
-                  "settings": {
-                    "badge": "Cheese!",
-                    "heading": "Upload photo",
-                    "description": "Provide an headshot of Dad",
-                    "property_key": "Dad's photo",
-                    "upload_button_text": "Choose image",
-                    "preview_placeholder": "Pop a photo in here!",
-                    "preview_mode": "headshot",
-                    "accept": "image/*",
-                    "required": true,
-                    "padding-block-start": 15,
-                    "padding-block-end": 15,
-                    "padding-inline-start": 15,
-                    "padding-inline-end": 15
-                  },
-                  "blocks": {}
-                },
-                "personalisation_photo_PWPdEq": {
-                  "type": "_personalisation-photo",
-                  "settings": {
-                    "badge": "Cheese!",
-                    "heading": "Upload photo",
-                    "description": "Provide a picture of the family",
-                    "property_key": "Family photo",
-                    "upload_button_text": "Choose image",
-                    "preview_placeholder": "Remember to smile!",
-                    "preview_mode": "landscape",
-                    "accept": "image/*",
-                    "required": true,
-                    "padding-block-start": 15,
-                    "padding-block-end": 15,
-                    "padding-inline-start": 15,
-                    "padding-inline-end": 15
-                  },
-                  "blocks": {}
-                },
-                "personalisation_radio_group_jhDrKc": {
-                  "type": "_personalisation-radio-group",
-                  "settings": {
-                    "badge": "",
-                    "heading": "Choose a Hair Color",
-                    "description": "",
-                    "property_key": "Hair Color",
-                    "required": true,
-                    "padding-block-start": 15,
-                    "padding-block-end": 15,
-                    "padding-inline-start": 15,
-                    "padding-inline-end": 15
-                  },
-                  "blocks": {}
-                }
-              },
-              "block_order": [
-                "personalisation_text_PByjmQ",
-                "personalisation_photo_GTUXna",
-                "personalisation_photo_PWPdEq",
-                "personalisation_radio_group_jhDrKc"
-              ]
-            },
             "divider_VJhene": {
               "type": "_divider",
               "name": "t:names.divider",
@@ -337,11 +239,90 @@
                 }
               },
               "block_order": []
+            },
+            "personalisation_dad_super_hero": {
+              "type": "personalisation",
+              "name": "t:names.personalisation",
+              "settings": {
+                "heading": "Make Dad's Super Hero story yours!",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {
+                "personalisation_photo_dad": {
+                  "type": "_personalisation-photo",
+                  "settings": {
+                    "badge": "Cheese!",
+                    "heading": "Upload photo of Dad",
+                    "description": "Provide a headshot of Dad",
+                    "property_key": "Dad's photo",
+                    "upload_button_text": "Choose image",
+                    "edit_button_text": "Edit",
+                    "save_button_text": "Save",
+                    "cancel_button_text": "Cancel",
+                    "preview_placeholder": "Pop a photo in here!",
+                    "preview_mode": "headshot",
+                    "accept": "image/*",
+                    "required": true,
+                    "padding-block-start": 15,
+                    "padding-block-end": 15,
+                    "padding-inline-start": 15,
+                    "padding-inline-end": 15
+                  },
+                  "blocks": {}
+                },
+                "personalisation_photo_family": {
+                  "type": "_personalisation-photo",
+                  "settings": {
+                    "badge": "Cheese!",
+                    "heading": "Upload family photo",
+                    "description": "Provide a picture of the family",
+                    "property_key": "Family photo",
+                    "upload_button_text": "Choose image",
+                    "edit_button_text": "Edit",
+                    "save_button_text": "Save",
+                    "cancel_button_text": "Cancel",
+                    "preview_placeholder": "Remember to smile!",
+                    "preview_mode": "landscape",
+                    "accept": "image/*",
+                    "required": true,
+                    "padding-block-start": 15,
+                    "padding-block-end": 15,
+                    "padding-inline-start": 15,
+                    "padding-inline-end": 15
+                  },
+                  "blocks": {}
+                },
+                "personalisation_text_child": {
+                  "type": "_personalisation-text",
+                  "settings": {
+                    "badge": "",
+                    "heading": "Child's name",
+                    "description": "Maximum 100 characters",
+                    "property_key": "Child's name",
+                    "placeholder": "Enter a name",
+                    "max_length": 100,
+                    "required": true,
+                    "padding-block-start": 15,
+                    "padding-block-end": 15,
+                    "padding-inline-start": 15,
+                    "padding-inline-end": 15
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "personalisation_photo_dad",
+                "personalisation_photo_family",
+                "personalisation_text_child"
+              ]
             }
           },
           "block_order": [
             "group_icgrde",
-            "personalisation_4HEyVE",
+            "personalisation_dad_super_hero",
             "divider_VJhene",
             "variant_picker_R3rGDr",
             "buy_buttons_eYQEYi"

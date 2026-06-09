@@ -189,42 +189,28 @@
                 "price_tVjtKg"
               ]
             },
-            "personalisation_4HEyVE": {
+            "personalisation_mom_super_hero": {
               "type": "personalisation",
               "name": "t:names.personalisation",
               "settings": {
-                "heading": "Make this DADVenture yours!",
+                "heading": "Make Mom's Super Hero story yours!",
                 "padding-block-start": 0,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
               "blocks": {
-                "personalisation_text_PByjmQ": {
-                  "type": "_personalisation-text",
-                  "settings": {
-                    "badge": "",
-                    "heading": "What is Dad's name?",
-                    "description": "Maximum 100 characters",
-                    "property_key": "Dad's Name",
-                    "placeholder": "Enter a name",
-                    "max_length": 100,
-                    "required": true,
-                    "padding-block-start": 15,
-                    "padding-block-end": 15,
-                    "padding-inline-start": 15,
-                    "padding-inline-end": 15
-                  },
-                  "blocks": {}
-                },
-                "personalisation_photo_GTUXna": {
+                "personalisation_photo_mom": {
                   "type": "_personalisation-photo",
                   "settings": {
-                    "badge": "Cheese!",
-                    "heading": "Upload photo",
-                    "description": "Provide an headshot of Dad",
-                    "property_key": "Dad's photo",
+                    "badge": "Love you mom!",
+                    "heading": "Upload photo of Mom",
+                    "description": "Provide a headshot of Mom — zoom and drag to focus on Mom's face",
+                    "property_key": "Mom's photo",
                     "upload_button_text": "Choose image",
+                    "edit_button_text": "Edit",
+                    "save_button_text": "Save",
+                    "cancel_button_text": "Cancel",
                     "preview_placeholder": "Pop a photo in here!",
                     "preview_mode": "headshot",
                     "accept": "image/*",
@@ -236,14 +222,33 @@
                   },
                   "blocks": {}
                 },
-                "personalisation_photo_PWPdEq": {
+                "personalisation_radio_hair": {
+                  "type": "_personalisation-radio-group",
+                  "settings": {
+                    "badge": "",
+                    "heading": "Select hair color",
+                    "description": "",
+                    "property_key": "Hair Color",
+                    "required": true,
+                    "option_group": "hair",
+                    "padding-block-start": 15,
+                    "padding-block-end": 15,
+                    "padding-inline-start": 15,
+                    "padding-inline-end": 15
+                  },
+                  "blocks": {}
+                },
+                "personalisation_photo_family": {
                   "type": "_personalisation-photo",
                   "settings": {
                     "badge": "Cheese!",
-                    "heading": "Upload photo",
+                    "heading": "Upload family photo",
                     "description": "Provide a picture of the family",
                     "property_key": "Family photo",
                     "upload_button_text": "Choose image",
+                    "edit_button_text": "Edit",
+                    "save_button_text": "Save",
+                    "cancel_button_text": "Cancel",
                     "preview_placeholder": "Remember to smile!",
                     "preview_mode": "landscape",
                     "accept": "image/*",
@@ -254,28 +259,12 @@
                     "padding-inline-end": 15
                   },
                   "blocks": {}
-                },
-                "personalisation_radio_group_jhDrKc": {
-                  "type": "_personalisation-radio-group",
-                  "settings": {
-                    "badge": "",
-                    "heading": "Choose a Hair Color",
-                    "description": "",
-                    "property_key": "Hair Color",
-                    "required": true,
-                    "padding-block-start": 15,
-                    "padding-block-end": 15,
-                    "padding-inline-start": 15,
-                    "padding-inline-end": 15
-                  },
-                  "blocks": {}
                 }
               },
               "block_order": [
-                "personalisation_text_PByjmQ",
-                "personalisation_photo_GTUXna",
-                "personalisation_photo_PWPdEq",
-                "personalisation_radio_group_jhDrKc"
+                "personalisation_photo_mom",
+                "personalisation_radio_hair",
+                "personalisation_photo_family"
               ]
             },
             "divider_VJhene": {
@@ -341,7 +330,7 @@
           },
           "block_order": [
             "group_icgrde",
-            "personalisation_4HEyVE",
+            "personalisation_mom_super_hero",
             "divider_VJhene",
             "variant_picker_R3rGDr",
             "buy_buttons_eYQEYi"
